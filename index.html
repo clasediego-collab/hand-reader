@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Lector de Manos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>🖐️ Lector de Manos</h1>
+    <div class="controls">
+      <select id="camera-select" aria-label="Seleccionar cámara">
+        <option value="">Cargando cámaras…</option>
+      </select>
+      <label class="mirror-toggle">
+        <input type="checkbox" id="mirror-toggle" checked />
+        Espejo
+      </label>
+      <button id="start-btn" disabled>Iniciar</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <video id="video" playsinline muted autoplay></video>
+    <canvas id="canvas"></canvas>
+    <div id="hint" class="hint">Presiona “Iniciar” para activar la cámara</div>
+  </main>
+
+  <footer id="status">Listo.</footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
