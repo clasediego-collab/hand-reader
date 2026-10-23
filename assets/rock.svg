@@ -4,14 +4,3 @@
   <circle cx="128" cy="96" r="8" fill="#64748b"/>
   <path d="M84 132c16 16 36 18 52 0" stroke="#64748b" stroke-width="8" fill="none" stroke-linecap="round"/>
 </svg>
-
-"},{"content":"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
-  <g stroke="#f8fafc" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
-    <circle cx="68" cy="62" r="28"/>
-    <circle cx="68" cy="150" r="28"/>
-    <path d="M96 82L168 112M96 130L168 92"/>
-    <path d="M170 54L148 110M170 160L148 110"/>
-  </g>
-</svg>
-
-" ,"path":"assets/scissors.svg"},{"content":"","path":".nojekyll"}]}
