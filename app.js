@@ -24,11 +24,37 @@ const HAND_CONNECTIONS = [
   [0,17]
 ];
 
+// [tip, articulación de referencia] para cada dedo
+const FINGERS = [
+  [4, 2],   // pulgar
+  [8, 6],   // índice
+  [12, 10], // medio
+  [16, 14], // anular
+  [20, 18], // meñique
+];
+
 let handLandmarker = null;
 let stream = null;
 let running = false;
 let rafId = null;
 let lastVideoTime = -1;
+
+// ---------- Conteo de dedos ----------
+
+function dist(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function countFingers(lm) {
+  const wrist = lm[0];
+  let count = 0;
+  for (const [tip, ref] of FINGERS) {
+    if (dist(lm[tip], wrist) > dist(lm[ref], wrist) * 1.1) count++;
+  }
+  return count;
+}
+
+// ---------- Modelo ----------
 
 async function initModel() {
   setStatus("Cargando modelo de MediaPipe…");
@@ -61,6 +87,8 @@ async function refreshCameras() {
     select.appendChild(opt);
   });
 }
+
+// ---------- Cámara ----------
 
 async function startCamera(deviceId) {
   stopCamera();
@@ -104,52 +132,98 @@ function applyMirror() {
   canvas.classList.toggle("mirror", on);
 }
 
+// ---------- Detección y dibujo ----------
+
 function detectLoop() {
   if (!running) return;
+
   if (video.readyState >= 2 && video.currentTime !== lastVideoTime) {
     lastVideoTime = video.currentTime;
+
     if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
     }
+
     const results = handLandmarker.detectForVideo(video, performance.now());
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     const hands = results.landmarks || [];
-    if (hands.length > 0) {
-      const scale = Math.max(canvas.width, canvas.height) / 600;
+    const scale = Math.max(canvas.width, canvas.height) / 600;
+    let totalFingers = 0;
+
+    for (const lm of hands) {
+      const fingers = countFingers(lm);
+      totalFingers += fingers;
+
+      // Huesos
+      ctx.strokeStyle = "#22d3ee";
       ctx.lineWidth = Math.max(2, 3 * scale);
-      for (const lm of hands) {
-        ctx.strokeStyle = "#22d3ee";
-        for (const [a, b] of HAND_CONNECTIONS) {
-          ctx.beginPath();
-          ctx.moveTo(lm[a].x * canvas.width, lm[a].y * canvas.height);
-          ctx.lineTo(lm[b].x * canvas.width, lm[b].y * canvas.height);
-          ctx.stroke();
-        }
-        for (let i = 0; i < lm.length; i++) {
-          const p = lm[i];
-          ctx.beginPath();
-          ctx.arc(p.x * canvas.width, p.y * canvas.height, Math.max(3, 5 * scale), 0, Math.PI * 2);
-          ctx.fillStyle = [4, 8, 12, 16, 20].includes(i) ? "#f472b6" : "#fbbf24";
-          ctx.fill();
-        }
+      for (const [a, b] of HAND_CONNECTIONS) {
+        ctx.beginPath();
+        ctx.moveTo(lm[a].x * canvas.width, lm[a].y * canvas.height);
+        ctx.lineTo(lm[b].x * canvas.width, lm[b].y * canvas.height);
+        ctx.stroke();
       }
-      setStatus(`Manos detectadas: ${hands.length}`);
-    } else {
+
+      // Puntos
+      for (let i = 0; i < lm.length; i++) {
+        const p = lm[i];
+        ctx.beginPath();
+        ctx.arc(p.x * canvas.width, p.y * canvas.height, Math.max(3, 5 * scale), 0, Math.PI * 2);
+        ctx.fillStyle = [4, 8, 12, 16, 20].includes(i) ? "#f472b6" : "#fbbf24";
+        ctx.fill();
+      }
+
+      // Número grande sobre la palma (landmark 9 = MCP del medio)
+      const palm = lm[9];
+      const px = palm.x * canvas.width;
+      const py = palm.y * canvas.height;
+      const fontSize = Math.max(40, 90 * scale);
+
+      ctx.font = `bold ${fontSize}px system-ui, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.lineWidth = Math.max(4, 8 * scale);
+      ctx.strokeStyle = "rgba(0,0,0,0.75)";
+      ctx.strokeText(fingers, px, py);
+      ctx.fillStyle = "#fbbf24";
+      ctx.fillText(fingers, px, py);
+    }
+
+    // Estado inferior
+    if (hands.length === 0) {
       setStatus("Acerca tu mano a la cámara…");
+    } else if (hands.length === 1) {
+      setStatus(`Manos: 1 · Dedos extendidos: ${totalFingers}`);
+    } else {
+      const detalle = hands.map(lm => countFingers(lm)).join(" + ");
+      setStatus(`Manos: ${hands.length} · Dedos: ${totalFingers} (${detalle})`);
     }
   }
+
   rafId = requestAnimationFrame(detectLoop);
 }
+
+// ---------- UI ----------
 
 function setStatus(msg) { statusEl.textContent = msg; }
 
 startBtn.addEventListener("click", async () => {
-  if (running) { stopCamera(); setStatus("Detenido."); return; }
+  if (running) {
+    stopCamera();
+    setStatus("Detenido.");
+    return;
+  }
   startBtn.disabled = true;
-  try { await startCamera(select.value || undefined); }
-  catch (e) { setStatus(`Error: ${e.message}`); console.error(e); }
-  finally { startBtn.disabled = false; }
+  try {
+    await startCamera(select.value || undefined);
+  } catch (e) {
+    setStatus(`Error: ${e.message}`);
+    console.error(e);
+  } finally {
+    startBtn.disabled = false;
+  }
 });
 
 select.addEventListener("change", async () => {
@@ -160,6 +234,8 @@ select.addEventListener("change", async () => {
 });
 
 mirrorToggle.addEventListener("change", applyMirror);
+
+// ---------- Arranque ----------
 
 (async () => {
   try {
