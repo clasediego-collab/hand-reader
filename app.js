@@ -10,6 +10,14 @@ const mirrorToggle = document.getElementById("mirror-toggle");
 const statusEl = document.getElementById("status");
 const hint = document.getElementById("hint");
 
+// Parámetros sintonizables vía URL:
+// ?debug=1&thumbMCP=145&thumbIP=145&thumbDist=0.5
+const params = new URLSearchParams(location.search);
+const DEBUG = params.has("debug");
+const THUMB_MCP_MIN = parseFloat(params.get("thumbMCP") || "145");
+const THUMB_IP_MIN  = parseFloat(params.get("thumbIP")  || "145");
+const THUMB_DIST_MIN = parseFloat(params.get("thumbDist") || "0.5");
+
 const MODEL_URL =
   "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
 const WASM_URL =
@@ -24,14 +32,8 @@ const HAND_CONNECTIONS = [
   [0,17]
 ];
 
-// [tip, articulación de referencia] para cada dedo
-const FINGERS = [
-  [4, 2],   // pulgar
-  [8, 6],   // índice
-  [12, 10], // medio
-  [16, 14], // anular
-  [20, 18], // meñique
-];
+// Los 4 dedos "normales": [tip, articulación PIP]
+const FINGERS_DIST = [[8, 6], [12, 10], [16, 14], [20, 18]];
 
 let handLandmarker = null;
 let stream = null;
@@ -39,18 +41,58 @@ let running = false;
 let rafId = null;
 let lastVideoTime = -1;
 
-// ---------- Conteo de dedos ----------
+// ---------- Utilidades ----------
 
 function dist(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-function countFingers(lm) {
+// Ángulo (en grados) en el punto b, formado por a-b-c
+function angleDeg(a, b, c) {
+  const v1x = a.x - b.x, v1y = a.y - b.y;
+  const v2x = c.x - b.x, v2y = c.y - b.y;
+  const dot = v1x * v2x + v1y * v2y;
+  const m1 = Math.hypot(v1x, v1y);
+  const m2 = Math.hypot(v2x, v2y);
+  if (m1 === 0 || m2 === 0) return 0;
+  const cos = Math.max(-1, Math.min(1, dot / (m1 * m2)));
+  return Math.acos(cos) * 180 / Math.PI;
+}
+
+// ---------- Conteo de dedos ----------
+
+function isThumbExtended(lm, debugInfo) {
+  const palmSize = dist(lm[0], lm[9]);         // muñeca → MCP del medio
+  const tipToIndex = dist(lm[4], lm[5]) / palmSize;
+  const mcpAngle = angleDeg(lm[1], lm[2], lm[4]); // ángulo en la MCP del pulgar
+  const ipAngle  = angleDeg(lm[2], lm[3], lm[4]); // ángulo en la IP del pulgar
+
+  const extended =
+    mcpAngle > THUMB_MCP_MIN &&
+    ipAngle  > THUMB_IP_MIN  &&
+    tipToIndex > THUMB_DIST_MIN;
+
+  if (debugInfo) {
+    debugInfo.mcp = Math.round(mcpAngle);
+    debugInfo.ip  = Math.round(ipAngle);
+    debugInfo.dst = tipToIndex.toFixed(2);
+    debugInfo.ext = extended;
+  }
+  return extended;
+}
+
+function countFingers(lm, debugInfo) {
   const wrist = lm[0];
   let count = 0;
-  for (const [tip, ref] of FINGERS) {
+
+  // 4 dedos normales por distancia tip vs PIP a la muñeca
+  for (const [tip, ref] of FINGERS_DIST) {
     if (dist(lm[tip], wrist) > dist(lm[ref], wrist) * 1.1) count++;
   }
+
+  // Pulgar por ángulos + distancia a la MCP del índice
+  if (isThumbExtended(lm, debugInfo)) count++;
+
   return count;
 }
 
@@ -153,7 +195,8 @@ function detectLoop() {
     let totalFingers = 0;
 
     for (const lm of hands) {
-      const fingers = countFingers(lm);
+      const debugInfo = DEBUG ? {} : null;
+      const fingers = countFingers(lm, debugInfo);
       totalFingers += fingers;
 
       // Huesos
@@ -175,7 +218,7 @@ function detectLoop() {
         ctx.fill();
       }
 
-      // Número grande sobre la palma (landmark 9 = MCP del medio)
+      // Número grande sobre la palma (landmark 9)
       const palm = lm[9];
       const px = palm.x * canvas.width;
       const py = palm.y * canvas.height;
@@ -189,16 +232,38 @@ function detectLoop() {
       ctx.strokeText(fingers, px, py);
       ctx.fillStyle = "#fbbf24";
       ctx.fillText(fingers, px, py);
+
+      // Debug: mostrar valores del pulgar junto a la punta (landmark 4)
+      if (DEBUG && debugInfo) {
+        const tip = lm[4];
+        const tx = tip.x * canvas.width;
+        const ty = tip.y * canvas.height;
+        const fsz = Math.max(12, 18 * scale);
+
+        ctx.font = `bold ${fsz}px monospace`;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "bottom";
+        ctx.lineWidth = Math.max(2, 3 * scale);
+        ctx.strokeStyle = "rgba(0,0,0,0.85)";
+
+        const label = `MCP ${debugInfo.mcp}° IP ${debugInfo.ip}° D ${debugInfo.dst}`;
+        ctx.strokeText(label, tx + 10 * scale, ty);
+        ctx.fillStyle = debugInfo.ext ? "#22c55e" : "#ef4444";
+        ctx.fillText(label, tx + 10 * scale, ty);
+      }
     }
 
     // Estado inferior
+    const cfg = DEBUG
+      ? ` · MCP>${THUMB_MCP_MIN}° IP>${THUMB_IP_MIN}° D>${THUMB_DIST_MIN}`
+      : "";
     if (hands.length === 0) {
       setStatus("Acerca tu mano a la cámara…");
     } else if (hands.length === 1) {
-      setStatus(`Manos: 1 · Dedos extendidos: ${totalFingers}`);
+      setStatus(`Manos: 1 · Dedos extendidos: ${totalFingers}${cfg}`);
     } else {
-      const detalle = hands.map(lm => countFingers(lm)).join(" + ");
-      setStatus(`Manos: ${hands.length} · Dedos: ${totalFingers} (${detalle})`);
+      const detalle = hands.map(lm => countFingers(lm, null)).join(" + ");
+      setStatus(`Manos: ${hands.length} · Dedos: ${totalFingers} (${detalle})${cfg}`);
     }
   }
 
