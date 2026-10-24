@@ -1,72 +1,34 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Juego de piedra, papel o tijera con mano detectada por MediaPipe" />
-    <title>Hand Reader Game</title>
-    <link rel="stylesheet" href="./style.css" />
-  </head>
-  <body>
-    <main class="app">
-      <header class="topbar">
-        <div class="title-block">
-          <span class="eyebrow">Game</span>
-          <h1>Piedra • Papel • Tijera</h1>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Lector de Manos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>🖐️ Lector de Manos</h1>
+    <div class="controls">
+      <select id="camera-select" aria-label="Seleccionar cámara">
+        <option value="">Cargando cámaras…</option>
+      </select>
+      <label class="mirror-toggle">
+        <input type="checkbox" id="mirror-toggle" checked />
+        Espejo
+      </label>
+      <button id="start-btn" disabled>Iniciar</button>
+    </div>
+  </header>
 
-        <div class="controls">
-          <select id="camera-select" aria-label="Seleccionar cámara"></select>
-        </div>
-      </header>
+  <main class="stage">
+    <video id="video" playsinline muted autoplay></video>
+    <canvas id="canvas"></canvas>
+    <div id="hint" class="hint">Presiona “Iniciar” para activar la cámara</div>
+  </main>
 
-      <section class="panel">
-        <div class="video-shell">
-          <video id="video" playsinline autoplay muted></video>
-          <canvas id="canvas"></canvas>
+  <footer id="status">Listo.</footer>
 
-          <img
-            id="intro-image"
-            class="intro-image"
-            src="./assets/intro.svg"
-            alt="Disfraz de mano"
-          />
-
-          <div id="countdown" class="countdown hidden">3</div>
-
-          <img
-            id="gesture-image"
-            class="gesture-image hidden"
-            alt="Gesto detectado"
-          />
-
-          <div id="result-badge" class="result-badge hidden">Ganaste</div>
-
-          <div id="hint" class="hint">
-            <strong>Permite la cámara</strong><br />
-            y coloca tu mano frente al dispositivo
-          </div>
-        </div>
-
-        <div class="hud">
-          <div class="status-row">
-            <span class="label">Estado</span>
-            <strong id="status">Cargando modelo…</strong>
-          </div>
-
-          <div class="status-row">
-            <span class="label">Marcador</span>
-            <strong id="score">Tú 0 · App 0</strong>
-          </div>
-
-          <div class="status-row">
-            <span class="label">Gesto</span>
-            <strong id="gesture-label">Sin mano</strong>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <script type="module" src="./app.js"></script>
-  </body>
+  <script type="module" src="app.js"></script>
+</body>
 </html>
