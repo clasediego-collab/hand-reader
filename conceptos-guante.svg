@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 500" role="img" aria-labelledby="title desc">
+  <title id="title">Tres ideas para el disfraz de guante</title>
+  <desc id="desc">Tres guantes de caricatura originales: clásico, colorido y retro tecnológico.</desc>
+  <defs>
+    <linearGradient id="background" x2="0" y2="1">
+      <stop stop-color="#f7f9ff"/>
+      <stop offset="1" stop-color="#e9eef8"/>
+    </linearGradient>
+    <linearGradient id="whiteGlove" x2="0" y2="1">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#e8edf4"/>
+    </linearGradient>
+    <linearGradient id="blueGlove" x2="0" y2="1">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#c9f3ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-20%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#182238" flood-opacity=".16"/>
+    </filter>
+    <g id="arm">
+      <path d="M126 282 C126 321 124 355 132 402" fill="none" stroke="#111827" stroke-width="42" stroke-linecap="round"/>
+    </g>
+    <g id="hand">
+      <path d="M126 286
+        C111 279 99 269 95 254
+        C91 241 96 231 104 225
+        C90 210 77 191 69 174
+        C63 160 68 150 78 148
+        C87 146 93 155 100 165
+        L119 193
+        L103 130
+        C99 115 104 105 114 103
+        C124 101 130 109 134 123
+        L149 177
+        L145 105
+        C144 89 150 81 160 82
+        C171 83 175 91 175 106
+        L178 177
+        L196 120
+        C201 106 210 102 219 106
+        C229 111 229 120 224 135
+        L208 190
+        C226 174 246 166 257 174
+        C269 183 264 195 250 202
+        L218 218
+        C224 232 220 250 207 261
+        C196 270 181 277 161 282
+        C151 285 138 287 126 286 Z"
+        fill="url(#whiteGlove)" stroke="#111827" stroke-width="8" stroke-linejoin="round"/>
+      <path d="M104 225 C119 237 139 240 151 233
+        C164 226 164 212 152 205
+        C143 200 132 201 126 207
+        M208 190 C195 201 182 207 168 207
+        M133 256 C147 264 165 265 180 259"
+        fill="none" stroke="#111827" stroke-width="5" stroke-linecap="round"/>
+      <path d="M119 193 C127 204 132 213 132 224
+        M175 106 C174 127 174 149 178 177"
+        fill="none" stroke="#b8c2d0" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <g id="cuff">
+      <path d="M111 279 Q139 294 173 278 L178 301 Q145 316 114 301 Z"
+        fill="#111827" stroke="#111827" stroke-width="5" stroke-linejoin="round"/>
+    </g>
+  </defs>
+
+  <rect width="1020" height="500" rx="30" fill="url(#background)"/>
+  <text x="510" y="49" text-anchor="middle" fill="#182238" font-family="system-ui, sans-serif" font-size="25" font-weight="750">Tres caminos para el guante</text>
+
+  <g filter="url(#shadow)">
+    <rect x="28" y="72" width="304" height="382" rx="24" fill="#fff"/>
+    <rect x="358" y="72" width="304" height="382" rx="24" fill="#fff"/>
+    <rect x="688" y="72" width="304" height="382" rx="24" fill="#fff"/>
+  </g>
+
+  <g transform="translate(48 70) scale(.77)">
+    <use href="#arm"/>
+    <use href="#hand"/>
+    <path d="M111 279 Q139 294 173 278 L178 301 Q145 316 114 301 Z"
+      fill="url(#whiteGlove)" stroke="#111827" stroke-width="5" stroke-linejoin="round"/>
+  </g>
+  <text x="180" y="424" text-anchor="middle" fill="#182238" font-family="system-ui, sans-serif" font-size="20" font-weight="750">1. Clásico</text>
+  <text x="180" y="448" text-anchor="middle" fill="#64748b" font-family="system-ui, sans-serif" font-size="14">Blanco, tinta negra y puño largo</text>
+
+  <g transform="translate(378 70) scale(.77)">
+    <use href="#arm"/>
+    <use href="#hand"/>
+    <path d="M111 279 Q139 294 173 278 L178 301 Q145 316 114 301 Z"
+      fill="#ff6b6b" stroke="#111827" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M137 291 L146 281 L155 291 L146 301 Z" fill="#ffe08a" stroke="#111827" stroke-width="3"/>
+    <path d="M224 109 L230 122 L244 124 L234 133 L237 147 L224 140 L212 147 L214 133 L204 124 L218 122 Z"
+      fill="#ffd166" stroke="#111827" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+  <text x="510" y="424" text-anchor="middle" fill="#182238" font-family="system-ui, sans-serif" font-size="20" font-weight="750">2. Alegre</text>
+  <text x="510" y="448" text-anchor="middle" fill="#64748b" font-family="system-ui, sans-serif" font-size="14">Puño coral y pequeño emblema</text>
+
+  <g transform="translate(708 70) scale(.77)">
+    <use href="#arm"/>
+    <path d="M111 279 Q139 294 173 278 L178 301 Q145 316 114 301 Z"
+      fill="#25c6da" stroke="#111827" stroke-width="5" stroke-linejoin="round"/>
+    <use href="#hand"/>
+    <path d="M139 291 L146 285 L153 291 L146 297 Z" fill="#e8fbff" stroke="#111827" stroke-width="2"/>
+    <path d="M160 91 L160 171 M82 160 L110 199 M211 128 L192 185 M217 187 L195 207"
+      fill="none" stroke="#25c6da" stroke-width="4" stroke-linecap="round" opacity=".85"/>
+  </g>
+  <text x="840" y="424" text-anchor="middle" fill="#182238" font-family="system-ui, sans-serif" font-size="20" font-weight="750">3. Tecno-retro</text>
+  <text x="840" y="448" text-anchor="middle" fill="#64748b" font-family="system-ui, sans-serif" font-size="14">Líneas cian discretas y puño turquesa</text>
+</svg>

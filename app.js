@@ -152,6 +152,25 @@ function drawCartoonGlove(lm) {
     ctx.stroke();
   }
 
+  if (forearmLength > 0) {
+    const outwardX = -forearmX / forearmLength;
+    const outwardY = -forearmY / forearmLength;
+    const cuffLength = palmWidth * 0.2;
+    const cuffWidth = palmWidth * 0.44;
+    const cuffCenterX = wrist.x + outwardX * cuffLength * 0.35;
+    const cuffCenterY = wrist.y + outwardY * cuffLength * 0.35;
+
+    ctx.translate(cuffCenterX, cuffCenterY);
+    ctx.rotate(Math.atan2(outwardY, outwardX));
+    ctx.beginPath();
+    ctx.roundRect(-cuffLength / 2, -cuffWidth / 2, cuffLength, cuffWidth, cuffWidth * 0.22);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = outlineWidth * 1.5;
+    ctx.stroke();
+  }
+
   ctx.restore();
 }
 
